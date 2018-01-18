@@ -8,8 +8,9 @@ buildscript {
 		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
 		classpath("io.spring.gradle:spring-io-plugin:0.0.8.RELEASE")
 		classpath('org.asciidoctor:asciidoctor-gradle-plugin:1.5.6')
-		// note dockbook-reference-plugin 0.3.1 fails with java.lang.StringIndexOutOfBoundsException: String index out of range: -1
-		classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
+		// note docbook-reference-plugin 0.3.1 fails with java.lang.StringIndexOutOfBoundsException: String index out of range: -1
+		// and 0.3.0 fails with groovy.lang.MissingPropertyException: No such property: level for class: org.gradle.internal.logging.slf4j.OutputEventListenerBackedLogger
+		//classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
 	}
 }
@@ -199,7 +200,9 @@ configure(sampleServerProjects()) {
 		compile "org.springframework:spring-expression:$springVersion"
 		compile "org.springframework:spring-context:$springVersion"
 		compile "org.springframework:spring-tx:$springVersion"
+		compile "org.springframework:spring-webmvc:$springVersion"
 		compile "org.springframework:spring-jdbc:$springVersion"
+		testCompile "org.springframework.boot:spring-boot-test:$springBootVersion"
 		testCompile "org.springframework:spring-test:$springVersion"
 		testCompile "org.hamcrest:hamcrest-core:$hamcrestVersion"
 		testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
@@ -235,15 +238,16 @@ configure(rootProject) {
 	description = 'Spring Security Kerberos Extension'
 
 	apply plugin: 'org.asciidoctor.gradle.asciidoctor'
-	apply plugin: 'docbook-reference'
+	// docbook-reference is buggy; see comments above in dependency section
+	//apply plugin: 'docbook-reference'
 
-	reference {
-		sourceDir = new File(asciidoctor.outputDir , 'docbook5')
-		pdfFilename = "spring-security-kerberos-reference.pdf"
-		epubFilename = "spring-security-kerberos-reference.epub"
-		expandPlaceholders = ""
-	}
-
+//	reference {
+//		sourceDir = new File(asciidoctor.outputDir , 'docbook5')
+//		pdfFilename = "spring-security-kerberos-reference.pdf"
+//		epubFilename = "spring-security-kerberos-reference.epub"
+//		expandPlaceholders = ""
+//	}
+//
 	afterEvaluate {
 		tasks.findAll { it.name.startsWith("reference") }.each{ it.dependsOn.add("asciidoctor") }
 	}
@@ -320,9 +324,10 @@ configure(rootProject) {
 			into 'api'
 		}
 
-		from (reference) {
-			into 'reference'
-		}
+	// docbook-reference is buggy; see comments above in dependency section
+//		from (reference) {
+//			into 'reference'
+//		}
 	}
 
 	task distZip(type: Zip, dependsOn: [docsZip]) {

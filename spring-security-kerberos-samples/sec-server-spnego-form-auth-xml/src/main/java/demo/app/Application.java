@@ -8,7 +8,7 @@ import org.springframework.context.annotation.ImportResource;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
-@ImportResource("websecurityconfig.xml")
+@ImportResource("classpath:websecurityconfig.xml")
 public class Application {
 
     public static void main(String[] args) throws Throwable {
