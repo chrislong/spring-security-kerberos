@@ -32,16 +32,15 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.context.PropertyPlaceholderAutoConfiguration;
+import org.springframework.boot.autoconfigure.http.HttpMessageConvertersAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.SecurityAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.DispatcherServletAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.EmbeddedServletContainerAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.ErrorMvcAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.HttpMessageConvertersAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.ServerPropertiesAutoConfiguration;
-import org.springframework.boot.autoconfigure.web.WebMvcAutoConfiguration;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerInitializedEvent;
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
+import org.springframework.boot.autoconfigure.web.servlet.DispatcherServletAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.ServletWebServerFactoryAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
+import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
+import org.springframework.boot.web.servlet.context.ServletWebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -49,7 +48,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.security.kerberos.client.KerberosRestTemplate;
 import org.springframework.security.kerberos.test.KerberosSecurityTestcase;
 import org.springframework.security.kerberos.test.MiniKdc;
 import org.springframework.stereotype.Controller;
@@ -87,7 +85,7 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 		kdc.createPrincipal(clientKeytab, clientPrincipal);
 
 
-		context = SpringApplication.run(new Object[] { WebSecurityConfig.class, VanillaWebConfiguration.class,
+		context = SpringApplication.run(new Class<?>[] { WebSecurityConfig.class, VanillaWebConfiguration.class,
 				WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
 				"--security.user.name=username", "--security.user.password=password",
 				"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
@@ -113,7 +111,7 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 		File serverKeytab = new File(workDir, "server.keytab");
 		kdc.createPrincipal(serverKeytab, serverPrincipal);
 
-		context = SpringApplication.run(new Object[] { WebSecurityConfigSpnegoForward.class, VanillaWebConfiguration.class,
+		context = SpringApplication.run(new Class<?>[] { WebSecurityConfigSpnegoForward.class, VanillaWebConfiguration.class,
 				WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
 				"--security.user.name=username", "--security.user.password=password",
 				"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
@@ -154,7 +152,7 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 		kdc.createPrincipal(clientKeytab, clientPrincipal);
 
 
-		context = SpringApplication.run(new Object[] { WebSecurityConfigSuccessHandler.class, VanillaWebConfiguration.class,
+		context = SpringApplication.run(new Class<?>[] { WebSecurityConfigSuccessHandler.class, VanillaWebConfiguration.class,
 				WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
 				"--security.user.name=username", "--security.user.password=password",
 				"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
@@ -169,14 +167,14 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 		assertThat(response, is("home"));
     }
 
-	protected static class PortInitListener implements ApplicationListener<EmbeddedServletContainerInitializedEvent> {
+	protected static class PortInitListener implements ApplicationListener<ServletWebServerInitializedEvent> {
 
 		public int port;
 		public CountDownLatch latch = new CountDownLatch(1);
 
 		@Override
-		public void onApplicationEvent(EmbeddedServletContainerInitializedEvent event) {
-			port = event.getEmbeddedServletContainer().getPort();
+		public void onApplicationEvent(ServletWebServerInitializedEvent event) {
+			port = event.getSource().getPort();
 			latch.countDown();
 		}
 
@@ -191,8 +189,8 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
     	}
 
     	@Bean
-    	public TomcatEmbeddedServletContainerFactory tomcatEmbeddedServletContainerFactory() {
-    	    TomcatEmbeddedServletContainerFactory factory = new TomcatEmbeddedServletContainerFactory();
+    	public TomcatServletWebServerFactory tomcatEmbeddedServletContainerFactory() {
+    		TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory();
     	    factory.setPort(0);
     	    return factory;
     	}
@@ -221,8 +219,7 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
     @Target(ElementType.TYPE)
     @Retention(RetentionPolicy.RUNTIME)
     @Documented
-    @Import({ EmbeddedServletContainerAutoConfiguration.class,
-                    ServerPropertiesAutoConfiguration.class,
+    @Import({ ServletWebServerFactoryAutoConfiguration.class,
                     DispatcherServletAutoConfiguration.class, WebMvcAutoConfiguration.class,
                     HttpMessageConvertersAutoConfiguration.class,
                     ErrorMvcAutoConfiguration.class, PropertyPlaceholderAutoConfiguration.class })

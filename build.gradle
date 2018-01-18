@@ -1,11 +1,14 @@
 buildscript {
 	repositories {
-		maven { url 'http://repo.springsource.org/plugins-release' }
+		mavenCentral()
+		maven { url "https://repo.spring.io/milestone" }
+        maven { url 'http://repo.spring.io/plugins-release' }
 	}
 	dependencies {
-		classpath("org.springframework.build.gradle:propdeps-plugin:0.0.7")
-		classpath("org.springframework.build.gradle:spring-io-plugin:0.0.3.RELEASE")
-		classpath('org.asciidoctor:asciidoctor-gradle-plugin:1.5.2')
+		classpath("io.spring.gradle:propdeps-plugin:0.0.9.RELEASE")
+		classpath("io.spring.gradle:spring-io-plugin:0.0.8.RELEASE")
+		classpath('org.asciidoctor:asciidoctor-gradle-plugin:1.5.6')
+		// note dockbook-reference-plugin 0.3.1 fails with java.lang.StringIndexOutOfBoundsException: String index out of range: -1
 		classpath("io.spring.gradle:docbook-reference-plugin:0.3.0")
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:$springBootVersion")
 	}
@@ -40,6 +43,7 @@ configure(allprojects) {
 
 	repositories {
 		mavenCentral()
+		maven { url "https://repo.spring.io/milestone" }
 		maven { url 'http://repo.spring.io/libs-release' }
 	}
 
@@ -139,7 +143,7 @@ project('spring-security-kerberos-client') {
 		testCompile "org.springframework.security:spring-security-config:$springSecurityVersion"
 		testCompile "org.springframework.boot:spring-boot-autoconfigure:$springBootVersion"
 		testRuntime "org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedVersion"
-		testRuntime "org.apache.tomcat.embed:tomcat-embed-logging-juli:$tomcatEmbedVersion"
+		testRuntime "org.apache.tomcat.embed:tomcat-embed-logging-juli:$tomcatEmbedJuliVersion"
 		testRuntime "org.springframework:spring-webmvc:$springVersion"
 	}
 }
@@ -179,7 +183,7 @@ project('spring-security-kerberos-samples-common') {
 }
 
 configure(sampleServerProjects()) {
-	apply plugin: 'spring-boot'
+	apply plugin: 'org.springframework.boot'
 	// don't publish boot packaged samples
 	configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
 	tasks.findByPath("artifactoryPublish")?.enabled = false
@@ -204,7 +208,7 @@ configure(sampleServerProjects()) {
 }
 
 configure(sampleClientProjects()) {
-	apply plugin: 'spring-boot'
+	apply plugin: 'org.springframework.boot'
 	// don't publish boot packaged samples
 	configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
 	tasks.findByPath("artifactoryPublish")?.enabled = false
@@ -391,7 +395,7 @@ configure(rootProject) {
 
 	task wrapper(type: Wrapper) {
 		description = 'Generates gradlew[.bat] scripts'
-		gradleVersion = '2.2.1'
+		gradleVersion = '4.4.1'
 	}
 
 }
