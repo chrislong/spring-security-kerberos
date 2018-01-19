@@ -32,6 +32,7 @@ configure(allprojects) {
 	apply plugin: 'eclipse'
 	apply plugin: 'idea'
 	apply plugin: 'propdeps'
+	apply plugin: 'propdeps-eclipse'
 
 	group = 'org.springframework.security.kerberos'
 
@@ -193,6 +194,7 @@ configure(sampleServerProjects()) {
 		compile project(":spring-security-kerberos-client")
 		compile project(":spring-security-kerberos-web")
 		compile "org.springframework.boot:spring-boot-starter-thymeleaf:$springBootVersion"
+		compile "org.springframework.boot:spring-boot-starter-web:$springBootVersion"
 		compile "org.springframework.security:spring-security-config:$springSecurityVersion"
 		compile "org.springframework.security:spring-security-ldap:$springSecurityVersion"
 		compile "org.springframework:spring-beans:$springVersion"

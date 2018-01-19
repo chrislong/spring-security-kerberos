@@ -1,4 +1,5 @@
 apply plugin: 'maven'
+apply plugin: 'propdeps-maven'
 
 ext.optionalDeps = []
 ext.providedDeps = []
