@@ -1,4 +1,5 @@
 apply plugin: 'maven'
+apply plugin: 'signing'
 apply plugin: 'propdeps-maven'
 
 ext.optionalDeps = []
@@ -15,6 +16,8 @@ install {
 
 def customizePom(pom, gradleProject) {
     pom.whenConfigured { generatedPom ->
+        generatedPom.artifactId = gradleProject.name
+
         // respect 'optional' and 'provided' dependencies
         gradleProject.optionalDeps.each { dep ->
             generatedPom.dependencies.find { it.artifactId == dep.name }?.optional = true
@@ -30,7 +33,7 @@ def customizePom(pom, gradleProject) {
 
         // add all items necessary for maven central publication
         generatedPom.project {
-            name = gradleProject.description
+            name = gradleProject.name
             description = gradleProject.description
             url = 'http://projects.spring.io/spring-security-kerberos'
             organization {
@@ -45,9 +48,9 @@ def customizePom(pom, gradleProject) {
                 }
             }
             scm {
-                url = 'https://github.com/SpringSource/spring-security-kerberos'
-                connection = 'scm:git:git://github.com/SpringSource/spring-security-kerberos'
-                developerConnection = 'scm:git:git://github.com/SpringSource/spring-security-kerberos'
+                url = 'https://github.com/chrislong/spring-security-kerberos'
+                connection = 'scm:git:git://github.com/chrislong/spring-security-kerberos'
+                developerConnection = 'scm:git:git://github.com/chrislong/spring-security-kerberos'
             }
             developers {
                 developer {
@@ -63,7 +66,28 @@ def customizePom(pom, gradleProject) {
                         twitter = 'tunebluez'
                     }
                 }
+                developer {
+                    id = 'chrislong'
+                    name = 'Chris Long'
+                    email = 'chris.long@nextcentury.com'
+                }
             }
         }
     }
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+    }
+  }
 }

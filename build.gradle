@@ -34,7 +34,10 @@ configure(allprojects) {
 	apply plugin: 'propdeps'
 	apply plugin: 'propdeps-eclipse'
 
-	group = 'org.springframework.security.kerberos'
+	// changed the group to not collide with official release
+	group = 'io.github.chrislong'
+	//group = 'org.springframework.security.kerberos'
+	//archivesBaseName = 'spring-security-kerberos'
 
 	sourceCompatibility=1.6
 	targetCompatibility=1.6
@@ -58,8 +61,6 @@ configure(allprojects) {
 }
 
 configure(subprojects) { subproject ->
-	apply from: "${rootProject.projectDir}/publish-maven.gradle"
-
 	jar {
 		manifest.attributes['Created-By'] = "${System.getProperty('java.version')} (${System.getProperty('java.specification.vendor')})"
 		manifest.attributes['Implementation-Title'] = subproject.name
@@ -100,18 +101,22 @@ configure(subprojects) { subproject ->
 		testCompile "junit:junit:$junitVersion"
 		testRuntime("log4j:log4j:$log4jVersion")
 	}
-
 }
 
 project('spring-security-kerberos-core') {
+    apply from: "${rootProject.projectDir}/publish-maven.gradle"
 	description = 'Spring Security Kerberos Core'
 	dependencies {
 		compile "org.springframework:spring-core:$springVersion"
 		compile "org.springframework.security:spring-security-core:$springSecurityVersion"
 	}
+	signing {
+		sign configurations.archives
+	}
 }
 
 project('spring-security-kerberos-web') {
+    apply from: "${rootProject.projectDir}/publish-maven.gradle"
 	description = 'Spring Security Kerberos Web'
 	dependencies {
 		compile project(":spring-security-kerberos-core")
@@ -124,9 +129,13 @@ project('spring-security-kerberos-web') {
 		testCompile "org.springframework.security:spring-security-config:$springSecurityVersion"
 		testCompile "org.springframework:spring-test:$springVersion"
 	}
+	signing {
+		sign configurations.archives
+	}
 }
 
 project('spring-security-kerberos-client') {
+    apply from: "${rootProject.projectDir}/publish-maven.gradle"
 	description = 'Spring Security Kerberos Client'
 
 	configurations {
@@ -147,6 +156,9 @@ project('spring-security-kerberos-client') {
 		testRuntime "org.apache.tomcat.embed:tomcat-embed-core:$tomcatEmbedVersion"
 		testRuntime "org.apache.tomcat.embed:tomcat-embed-logging-juli:$tomcatEmbedJuliVersion"
 		testRuntime "org.springframework:spring-webmvc:$springVersion"
+	}
+	signing {
+		sign configurations.archives
 	}
 }
 
@@ -404,6 +416,5 @@ configure(rootProject) {
 		description = 'Generates gradlew[.bat] scripts'
 		gradleVersion = '4.4.1'
 	}
-
 }
 
