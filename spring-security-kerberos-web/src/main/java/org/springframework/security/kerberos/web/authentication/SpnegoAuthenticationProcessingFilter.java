@@ -113,6 +113,14 @@ public class SpnegoAuthenticationProcessingFilter extends OncePerRequestFilter {
     private SessionAuthenticationStrategy sessionStrategy = new NullAuthenticatedSessionStrategy();
     private boolean skipIfAlreadyAuthenticated = true;
 
+    /**
+     * Authentication header prefix sent by IE/Windows when the domain controller fails to issue a Kerberos
+     * ticket for the URL.
+     *
+     * "TlRMTVNTUA" is the base64 encoding of "NTLMSSP". This will be followed by the actual token.
+     **/
+    private static final String NTLMSSP_PREFIX = "Negotiate TlRMTVNTUA";
+
     @Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
 			throws ServletException, IOException {
@@ -129,7 +137,7 @@ public class SpnegoAuthenticationProcessingFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        if (header != null && (header.startsWith("Negotiate ") || header.startsWith("Kerberos "))) {
+        if (header != null && ((header.startsWith("Negotiate ") && !header.startsWith(NTLMSSP_PREFIX)) || header.startsWith("Kerberos "))) {
             if (logger.isDebugEnabled()) {
                 logger.debug("Received Negotiate Header for request " + request.getRequestURL() + ": " + header);
             }
