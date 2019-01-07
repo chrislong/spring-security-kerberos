@@ -116,7 +116,7 @@ public class KerberosRestTemplateTests extends KerberosSecurityTestcase {
 		kdc.createPrincipal(userPrincipal, password);
 
 
-		context = SpringApplication.run(new Object[] { WebSecurityConfig.class, VanillaWebConfiguration.class,
+		context = SpringApplication.run(new Class<?>[] { WebSecurityConfig.class, VanillaWebConfiguration.class,
 				WebConfiguration.class }, new String[] { "--security.basic.enabled=true",
 				"--security.user.name=username", "--security.user.password=password",
 				"--serverPrincipal=" + serverPrincipal, "--serverKeytab=" + serverKeytab.getAbsolutePath() });
